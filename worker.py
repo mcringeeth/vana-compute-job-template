@@ -2,10 +2,13 @@ from pathlib import Path
 import sqlite3
 import json
 import os
+import sys
+from query_engine_client import QueryEngineClient
 
 # Paths to the database and output file
 DB_PATH = Path(os.getenv("INPUT_PATH", "/mnt/input")) / "query_results.db"  # Default path to the SQLite database
 OUTPUT_PATH = Path(os.getenv("OUTPUT_PATH", "/mnt/output")) / "stats.json"  # Default output JSON path
+DEV_MODE = os.getenv("DEV_MODE", "0").lower() in ("1", "true", "yes")  # Enable development mode
 
 def get_user_locales():
     """Connects to the SQLite DB and retrieves user_id and locale."""
@@ -43,8 +46,35 @@ def save_stats_to_json(user_locales, output_path):
         print(f"Error saving JSON: {e}")
 
 def main():
-    print(f"Processing query results from {DB_PATH}")
-
+    # Check if we're in development mode
+    if DEV_MODE:
+        print("Running in DEVELOPMENT MODE - using local database file")
+        print(f"Processing query results from {DB_PATH}")
+    else:
+        # Get query and signature from environment variables
+        query = os.getenv("QUERY", "")
+        query_signature = os.getenv("QUERY_SIGNATURE", "")
+        
+        if not query or not query_signature:
+            print("Error: Missing required QUERY or QUERY_SIGNATURE environment variables")
+            print("Set DEV_MODE=1 to use local database file without query execution")
+            sys.exit(1)
+        
+        # Initialize query engine client
+        query_engine_client = QueryEngineClient(query, query_signature, str(DB_PATH))
+        
+        # Execute query
+        print(f"Executing query: {query}")
+        query_result = query_engine_client.execute_query()
+        
+        if not query_result.success:
+            print(f"Error executing query: {query_result.error}")
+            sys.exit(2)
+        
+        # Query executed successfully, now process the results
+        print(f"Query executed successfully, processing results from {DB_PATH}")
+    
+    # Process the database file (whether it came from dev mode or query execution)
     user_locales = get_user_locales()
     if user_locales:
         print(f"Found {len(user_locales)} users in the database")
