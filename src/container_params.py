@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import os
 import json
-import sys
-from typing import Optional, Dict, Any
+from typing import Optional, List, Any
 
 class ContainerParamError(Exception):
     """Base class for container parameter errors."""
@@ -19,7 +18,7 @@ class ContainerParams:
     # Required in production mode
     query: Optional[str] = None
     query_signature: Optional[str] = None
-    query_params: Optional[Dict[str, Any]] = None
+    query_params: Optional[List[Any]] = None
     compute_job_id: Optional[int] = None
     data_refiner_id: Optional[int] = None
     
@@ -73,10 +72,6 @@ class ContainerParams:
         if not self.query or not self.query_signature:
             print("Error: Missing required QUERY or QUERY_SIGNATURE environment variables")
             print("Set DEV_MODE=1 to use local database file without query execution")
-            return False
-            
-        if not self.query_params:
-            print("Error: Missing required QUERY_PARAMS environment variables")
             return False
             
         if not self.compute_job_id or not self.data_refiner_id:
