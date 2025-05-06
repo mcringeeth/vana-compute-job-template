@@ -2,7 +2,7 @@ import os
 import time
 import logging
 import requests
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, List
 from dataclasses import dataclass
 import contextlib
 
@@ -59,11 +59,13 @@ class QueryEngineClient:
         
         logger.info("QueryEngineClient initialized")
 
-    def execute_query(self, params: Optional[Dict[str, Any]] = None) -> QueryResult:
+    def execute_query(self, job_id: int, refiner_id: int, params: Optional[List[Any]] = None) -> QueryResult:
         """
         Execute a query and wait for results
         
         Args:
+            job_id: The compute job ID
+            refiner_id: The data refiner ID
             params: Optional parameters to include with the query
             
         Returns:
@@ -71,13 +73,13 @@ class QueryEngineClient:
             
         Example:
             >>> client = QueryEngineClient(query, signature, "output/results.db")
-            >>> result = client.execute_query({"param1": "value1"})
+            >>> result = client.execute_query(21, 12, [1, 2, 3])
             >>> if result.success:
             >>>     print(f"Query successful, results at: {result.file_path}")
         """
-        try:
+        try:            
             # Submit the query
-            query_id = self._submit_query(params)
+            query_id = self._submit_query(job_id, refiner_id, params)
             
             # Poll for results
             return self._poll_until_complete(query_id)
@@ -100,7 +102,7 @@ class QueryEngineClient:
                 status_code=500
             )
 
-    def _submit_query(self, params: Optional[Dict[str, Any]] = None) -> str:
+    def _submit_query(self, job_id: int, refiner_id: int, params: Optional[List[Any]] = None) -> str:
         """
         Submit a query to the Query Engine
         
@@ -114,7 +116,9 @@ class QueryEngineClient:
         headers = self._get_headers()
         data = {
             "query": self.query,
-            "params": params or {}
+            "params": params or [],
+            "refiner_id": refiner_id,
+            "job_id": job_id
         }
         
         logger.info(f"Submitting query: {self.query}")
