@@ -118,7 +118,7 @@ class QueryEngineClient:
             "query": self.query,
             "params": params or [],
             "refiner_id": refiner_id,
-            "job_id": job_id
+            "job_id": str(job_id)
         }
         
         logger.info(f"Submitting query: {self.query}")
