@@ -7,7 +7,6 @@ COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 
 # Copy Python files
-COPY worker.py /app/
-COPY query_engine_client.py /app/
+COPY src/ /app/
 
 CMD ["python", "/app/worker.py"]
