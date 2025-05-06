@@ -181,7 +181,7 @@ class QueryEngineClient:
                 query_status = response_data.get("query_status", "")
                 logger.info(f"Query {query_id} status: {query_status}")
                 
-                if query_status == "SUCCESS":
+                if query_status == "success":
                     logger.info(f"Query {query_id} completed successfully")
                     
                     # Download results if URL is provided
@@ -196,7 +196,7 @@ class QueryEngineClient:
                         file_path=downloaded_path if results_url else None
                     )
                 
-                elif query_status == "FAILED":
+                elif query_status == "failed":
                     error_msg = f"Query {query_id} failed"
                     logger.error(error_msg)
                     return QueryResult(
