@@ -1,5 +1,6 @@
 name: Image Checks
 
+
 on:
   push:
     branches: [ "**" ]
@@ -36,22 +37,9 @@ jobs:
         run: ./scripts/image-export.sh
         shell: bash
       
-      - name: Calculate image checksum
-        run: |
-          sha256sum *.tar > image-checksums.txt
-          cat image-checksums.txt
-        shell: bash
-      
       - name: Upload exported image
         uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: "*.tar"
-          retention-days: 7
-      
-      - name: Upload image checksums
-        uses: actions/upload-artifact@v4
-        with:
-          name: image-checksums
-          path: "image-checksums.txt"
           retention-days: 7
